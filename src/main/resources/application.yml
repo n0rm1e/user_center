@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: user-center
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/normie
+    username: root
+    password: root
+  mvc:
+    servlet:
+      load-on-startup: 1
+  session:
+    store-type: redis
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 3000
+    database: 0
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+knife4j:
+  enable: true
+  openapi:
+    title: 伙伴匹配系统文档
+    description: "伙伴匹配系统的文档"
+    email: ne18111864417@163.com
+    concat: normie
+    url: https://docs.xiaominfo.com
+    version: v4.0
+    license: Apache 2.0
+    license-url: https://stackoverflow.com/
+    terms-of-service-url: https://stackoverflow.com/
+    group:
+      test1:
+        group-name: groupName
+        api-rule: package
+        api-rule-resources:
+          - com.knife4j.demo.new3
