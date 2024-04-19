@@ -53,7 +53,6 @@ public class User implements Serializable {
 
     /**
      * 电话
-
      */
     private String phone;
 
@@ -69,7 +68,6 @@ public class User implements Serializable {
 
     /**
      * 注册时间
-
      */
     private Date createTime;
 
@@ -87,6 +85,11 @@ public class User implements Serializable {
      * 0为普通用户 1为管理员
      */
     private Integer userRole;
+
+    /**
+     * 个人标签json
+     */
+    private String tags;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

@@ -7,9 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @MapperScan("com.normie.user_center.mapper")
 public class UserCenterApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(UserCenterApplication.class, args);
     }
-
 }
