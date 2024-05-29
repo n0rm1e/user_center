@@ -2,6 +2,7 @@ package com.normie.user_center.service.impl;
 import java.util.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -10,6 +11,7 @@ import com.normie.user_center.exception.BusinessException;
 import com.normie.user_center.model.User;
 import com.normie.user_center.mapper.UserMapper;
 import com.normie.user_center.service.UserService;
+import com.normie.user_center.utils.AlgorithmUtils;
 import jdk.jfr.Description;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,14 +20,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.normie.user_center.constant.UserConstant.ADMIN_ROLE;
-import static com.normie.user_center.constant.UserConstant.USER_LOGIN_STATE;
+import static com.normie.user_center.constant.UserConstant.*;
 
 /**
 * @author 10377
@@ -115,16 +118,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         log.info("user login success");
         // 用户脱敏
         User safeUser = getSafetyUser(user);
-
         //记录用户的登录态
         HttpSession session = request.getSession();
         session.setAttribute(USER_LOGIN_STATE, safeUser);
+        session.setMaxInactiveInterval(24 * 60 * 60 * 100);
+
         return safeUser;
     }
 
     @Override
     public Integer userLogout(HttpServletRequest request) {
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        HttpSession session = request.getSession();
+        session.setAttribute(USER_LOGIN_STATE,"logout");
         return 1;
     }
 
@@ -208,7 +213,52 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        return (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        Object user = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(user.equals("logout")){
+            return null;
+        }
+        return (User) user ;
+    }
+
+    @Override
+    public List<User> recommendUsers(int num, HttpServletRequest request) {
+        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id","tags");
+        queryWrapper.isNotNull("tags");
+        List<User> userList = userMapper.selectList(queryWrapper);
+
+        Gson gson = new Gson();
+        Map<Long, List<String>> userTags = new HashMap<>();
+        // 先插入收到推荐的用户
+        Long loginUserId = loginUser.getId();
+        String tags = loginUser.getTags();
+        userTags.put(loginUserId,gson.fromJson(tags, new TypeToken<List<String>>() {}.getType()));
+        // 插入其他用户
+        for (User user : userList) {
+            userTags.put(user.getId(),gson.fromJson(user.getTags(), new TypeToken<List<String>>() {}.getType()));
+        }
+
+        // 生成标签全集
+        Set<String> allTagsSet = new HashSet<>();
+        for (List<String> tag : userTags.values()) {
+            allTagsSet.addAll(tag);
+        }
+        List<String> allTags = new ArrayList<>(allTagsSet);
+
+        // 将用户标签列表向量化
+        Map<Long, int[]> userVectors = new HashMap<>();
+        for (Map.Entry<Long, List<String>> entry : userTags.entrySet()) {
+            if (entry.getValue() != null) {
+                userVectors.put(entry.getKey(), AlgorithmUtils.vectorizeTags(entry.getValue(), allTags));
+            }
+        }
+        // 最后进行余弦相似度算法推荐用户
+        List<Long> recommendations = AlgorithmUtils.recommendUsers(loginUserId, userVectors,num);
+        System.out.println("Recommendations for " + loginUserId + ": " + recommendations);
+
+        return userMapper.selectList(new QueryWrapper<User>().in("id", recommendations));
     }
 
     @Description("sql搜索")

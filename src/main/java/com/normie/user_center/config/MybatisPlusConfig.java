@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * MyBatisPlus 配置
  */
 @Configuration
+@EnableTransactionManagement
 @MapperScan("com.normie.user_center.mapper")
 public class MybatisPlusConfig {
 

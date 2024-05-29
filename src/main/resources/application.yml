@@ -4,8 +4,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/normie
-    username: root
-    password: root
+    username: normie
+    password: 1314159*
   mvc:
     servlet:
       load-on-startup: 1
@@ -20,7 +20,7 @@ server:
   port: 8080
   servlet:
     context-path: /api
-
+  url: http://localhost:3000
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -34,12 +34,11 @@ mybatis-plus:
 knife4j:
   enable: true
   openapi:
-    title: 伙伴匹配系统文档
-    description: "伙伴匹配系统的文档"
+    title: 智能推荐系统
+    description: "智能推荐的文档"
     email: ne18111864417@163.com
     concat: normie
-    url: https://docs.xiaominfo.com
-    version: v4.0
+    version: v1.0
     license: Apache 2.0
     license-url: https://stackoverflow.com/
     terms-of-service-url: https://stackoverflow.com/

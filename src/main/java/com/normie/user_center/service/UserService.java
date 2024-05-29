@@ -1,5 +1,6 @@
 package com.normie.user_center.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.normie.user_center.model.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -76,4 +77,12 @@ public interface UserService extends IService<User> {
     boolean isAdmin(HttpServletRequest request);
 
     User getLoginUser(HttpServletRequest request);
+
+    /**
+     * 匹配用户
+     * @param num
+     * @param request
+     * @return
+     */
+    List<User> recommendUsers(int num, HttpServletRequest request);
 }

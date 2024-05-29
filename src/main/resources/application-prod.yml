@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: user-center
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.121.27.196:3306/normie
+    username: normie
+    password: 1314159*
+server:
+  port: 7038
+  servlet:
+    context-path: /api
+  url: http://47.121.27.196
